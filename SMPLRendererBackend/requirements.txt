@@ -1,0 +1,6 @@
+numpy
+trimesh
+smplx
+flask
+scipy
+git+https://github.com/mattloper/chumpy
