@@ -227,6 +227,15 @@ a:hover { color: var(--primary-dark); }
   color: var(--text);
 }
 
+/* iOS CSS fullscreen fallback */
+.splat-wrapper.css-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* ── Fullscreen button (stays on viewer) ── */
 .splat-fullscreen-btn {
   position: absolute;

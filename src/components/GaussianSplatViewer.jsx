@@ -21,11 +21,20 @@ export default function GaussianSplatViewer({ quality }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isCSSFullscreen, setIsCSSFullscreen] = useState(false)
+
+  const fullscreen = isFullscreen || isCSSFullscreen
 
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement)
+    const handler = () => {
+      setIsFullscreen(!!(document.fullscreenElement || document.webkitFullscreenElement))
+    }
     document.addEventListener('fullscreenchange', handler)
-    return () => document.removeEventListener('fullscreenchange', handler)
+    document.addEventListener('webkitfullscreenchange', handler)
+    return () => {
+      document.removeEventListener('fullscreenchange', handler)
+      document.removeEventListener('webkitfullscreenchange', handler)
+    }
   }, [])
 
   useEffect(() => {
@@ -85,24 +94,35 @@ export default function GaussianSplatViewer({ quality }) {
   }, [quality])
 
   function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      wrapperRef.current?.requestFullscreen()
+    const el = wrapperRef.current
+    if (!el) return
+
+    const apiSupported = !!(el.requestFullscreen || el.webkitRequestFullscreen)
+
+    if (apiSupported) {
+      const active = document.fullscreenElement || document.webkitFullscreenElement
+      if (!active) {
+        ;(el.requestFullscreen || el.webkitRequestFullscreen).call(el)
+      } else {
+        ;(document.exitFullscreen || document.webkitExitFullscreen).call(document)
+      }
     } else {
-      document.exitFullscreen()
+      // iOS fallback: CSS-based viewport cover
+      setIsCSSFullscreen(p => !p)
     }
   }
 
   return (
-    <div ref={wrapperRef} className="splat-wrapper">
+    <div ref={wrapperRef} className={`splat-wrapper${isCSSFullscreen ? ' css-fullscreen' : ''}`}>
       {loading && !error && <div className="splat-overlay">Loading 3D scene…</div>}
       {error && <div className="splat-overlay">3D scene unavailable</div>}
       <div ref={containerRef} className="splat-container" />
       <button
         className="splat-fullscreen-btn"
         onClick={toggleFullscreen}
-        title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
       >
-        {isFullscreen ? <CompressIcon /> : <ExpandIcon />}
+        {fullscreen ? <CompressIcon /> : <ExpandIcon />}
       </button>
     </div>
   )
