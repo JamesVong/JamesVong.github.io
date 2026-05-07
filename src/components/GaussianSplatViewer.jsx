@@ -18,7 +18,6 @@ export default function GaussianSplatViewer({ quality }) {
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
 
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCSSFullscreen, setIsCSSFullscreen] = useState(false)
@@ -40,7 +39,6 @@ export default function GaussianSplatViewer({ quality }) {
   useEffect(() => {
     if (!containerRef.current) return
     let active = true
-    setLoading(true)
     setError(false)
 
     const splatFile = quality === 'high'
@@ -70,11 +68,10 @@ export default function GaussianSplatViewer({ quality }) {
 
         viewerRef.current = viewer
         await viewer.addSplatScene(splatFile)
-        if (active) { viewer.start(); setLoading(false) }
+        if (active) viewer.start()
       } catch (err) {
         if (!active) return
         console.error('Splat viewer error:', err)
-        setLoading(false)
         setError(true)
       }
     })()
@@ -84,10 +81,7 @@ export default function GaussianSplatViewer({ quality }) {
       if (viewerRef.current) {
         const v = viewerRef.current
         viewerRef.current = null
-        // dispose() is async internally; catch both sync throws and async rejections
-        try {
-          Promise.resolve(v.dispose()).catch(() => {})
-        } catch (_) {}
+        try { Promise.resolve(v.dispose()).catch(() => {}) } catch (_) {}
       }
       try { viewerDiv.remove() } catch (_) {}
     }
@@ -107,23 +101,24 @@ export default function GaussianSplatViewer({ quality }) {
         ;(document.exitFullscreen || document.webkitExitFullscreen).call(document)
       }
     } else {
-      // iOS fallback: CSS-based viewport cover
       setIsCSSFullscreen(p => !p)
     }
   }
 
+  function toggleInfo() {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'i', code: 'KeyI', bubbles: true }))
+  }
+
   return (
     <div ref={wrapperRef} className={`splat-wrapper${isCSSFullscreen ? ' css-fullscreen' : ''}`}>
-      {loading && !error && <div className="splat-overlay">Loading 3D scene…</div>}
       {error && <div className="splat-overlay">3D scene unavailable</div>}
       <div ref={containerRef} className="splat-container" />
-      <button
-        className="splat-fullscreen-btn"
-        onClick={toggleFullscreen}
-        title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-      >
-        {fullscreen ? <CompressIcon /> : <ExpandIcon />}
-      </button>
+      <div className="splat-viewer-btns">
+        <button className="splat-viewer-btn" onClick={toggleInfo} title="Toggle info">i</button>
+        <button className="splat-viewer-btn" onClick={toggleFullscreen} title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+          {fullscreen ? <CompressIcon /> : <ExpandIcon />}
+        </button>
+      </div>
     </div>
   )
 }

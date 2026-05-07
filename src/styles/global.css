@@ -152,7 +152,8 @@ a:hover { color: var(--primary-dark); }
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
   pointer-events: none;
-  z-index: 5;
+  z-index: 50;
+  background: rgba(26, 44, 62, 0.85);
 }
 
 .hero-text {
@@ -236,12 +237,16 @@ a:hover { color: var(--primary-dark); }
   height: 100% !important;
 }
 
-/* ── Fullscreen button (stays on viewer) ── */
-.splat-fullscreen-btn {
+/* ── Viewer button group (info + fullscreen) ── */
+.splat-viewer-btns {
   position: absolute;
   bottom: 12px;
   right: 12px;
   z-index: 20;
+  display: flex;
+  gap: 6px;
+}
+.splat-viewer-btn {
   width: 30px;
   height: 30px;
   border-radius: var(--radius-sm);
@@ -254,8 +259,12 @@ a:hover { color: var(--primary-dark); }
   cursor: pointer;
   transition: all 0.15s;
   backdrop-filter: blur(6px);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
 }
-.splat-fullscreen-btn:hover { background: rgba(0, 0, 0, 0.65); color: #fff; }
+.splat-viewer-btn:hover { background: rgba(0, 0, 0, 0.65); color: #fff; }
 
 /* ===== ABOUT ===== */
 .about-text {
