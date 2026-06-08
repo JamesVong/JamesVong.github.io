@@ -184,6 +184,9 @@ a:hover { color: var(--primary-dark); }
   background: linear-gradient(to top, rgba(20, 35, 50, 0.88) 0%, transparent 100%);
   color: #fff;
   z-index: 10;
+  /* Static caption only (no links/buttons) — let drags/taps pass through to the
+     splat canvas underneath instead of being captured by this overlay. */
+  pointer-events: none;
 }
 
 .hero-text h1 {
