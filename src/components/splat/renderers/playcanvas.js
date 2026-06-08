@@ -50,10 +50,11 @@ export async function mount(container, { quality, onReady, onError }) {
     app.root.addChild(cam)
 
     // Minimal orbit controller. Up is -Y to match this capture's orientation
-    // (its vertical axis points down).
-    const target = new pc.Vec3(0, 0, 0)
-    let yaw = 0
-    let pitch = -10
+    // (its vertical axis points down). Start view picked via an on-screen
+    // readout while orbiting to a good framing of the space.
+    const target = new pc.Vec3(-0.112, 0.257, 0.223)
+    let yaw = 174.3
+    let pitch = -11.5
     let distance = 3
     const applyCam = () => {
       const p = (pitch * Math.PI) / 180
