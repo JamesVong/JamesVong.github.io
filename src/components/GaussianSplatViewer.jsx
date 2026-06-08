@@ -7,6 +7,12 @@ const ExpandIcon = () => (
   </svg>
 )
 
+// iPadOS Safari reports a desktop Mac UA, so UA sniffing alone misses it —
+// the touch-point check is the standard disambiguator.
+const isIOS = () =>
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
 const CompressIcon = () => (
   <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14" aria-hidden="true">
     <path d="M5 0v5H0v1h6V0H5zm5 0v6h6V5h-5V0h-1zM0 10v1h5v5h1v-6H0zm10 6h1v-5h5v-1h-6v6z" />
@@ -83,7 +89,10 @@ export default function GaussianSplatViewer({ library = DEFAULT_RENDERER, qualit
     const el = wrapperRef.current
     if (!el) return
 
-    const apiSupported = !!(el.requestFullscreen || el.webkitRequestFullscreen)
+    // iOS/iPadOS's native fullscreen overlays a system swipe-down-to-exit
+    // gesture that steals downward drags from the viewer, so prefer the CSS
+    // fallback there even though requestFullscreen exists on iPadOS Safari.
+    const apiSupported = !isIOS() && !!(el.requestFullscreen || el.webkitRequestFullscreen)
 
     if (apiSupported) {
       const active = document.fullscreenElement || document.webkitFullscreenElement
