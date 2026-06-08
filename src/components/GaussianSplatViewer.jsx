@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { getRenderer, DEFAULT_RENDERER } from './splat/registry.js'
 
 const ExpandIcon = () => (
   <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14" aria-hidden="true">
@@ -12,13 +13,14 @@ const CompressIcon = () => (
   </svg>
 )
 
-// quality prop: 'high' | 'fast' — controlled by parent
-export default function GaussianSplatViewer({ quality }) {
+// Splat viewer. `library` selects a renderer from the registry; `quality` selects
+// the asset detail ('high' | 'fast'). Both are controlled by the parent.
+export default function GaussianSplatViewer({ library = DEFAULT_RENDERER, quality }) {
   const wrapperRef = useRef(null)
   const containerRef = useRef(null)
-  const viewerRef = useRef(null)
 
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCSSFullscreen, setIsCSSFullscreen] = useState(false)
 
@@ -38,54 +40,44 @@ export default function GaussianSplatViewer({ quality }) {
 
   useEffect(() => {
     if (!containerRef.current) return
-    let active = true
+    let cancelled = false
+    let handle = null
     setError(false)
+    setLoading(true)
 
-    const splatFile = quality === 'high'
-      ? '/ckpt_last.compressed.ply'
-      : '/ckpt_last_lower.compressed.ply'
-
-    // Fresh inner div each time so the viewer's dispose() never touches
-    // React-managed nodes, avoiding the removeChild DOM error on switch.
+    // Fresh inner div per mount so an engine's teardown never touches
+    // React-managed nodes (avoids removeChild errors when switching).
     const viewerDiv = document.createElement('div')
     viewerDiv.style.cssText = 'width:100%;height:100%;'
     containerRef.current.appendChild(viewerDiv)
 
-    ;(async () => {
-      try {
-        const { Viewer } = await import('@mkkellogg/gaussian-splats-3d')
-        if (!active) return
-
-        const viewer = new Viewer({
-          rootElement: viewerDiv,
-          selfDrivenMode: true,
-          useBuiltInControls: true,
-          cameraUp: [0, -1, 0],
-          initialCameraPosition: [-0.149, -0.218, -2.992],
-          initialCameraLookAt: [-0.176, 0.256, -0.390],
-          sharedMemoryForWorkers: false,
-        })
-
-        viewerRef.current = viewer
-        await viewer.addSplatScene(splatFile)
-        if (active) viewer.start()
-      } catch (err) {
-        if (!active) return
-        console.error('Splat viewer error:', err)
+    const entry = getRenderer(library)
+    entry
+      .load()
+      .then((mod) =>
+        mod.mount(viewerDiv, {
+          quality,
+          onReady: () => { if (!cancelled) setLoading(false) },
+          onError: () => { if (!cancelled) { setError(true); setLoading(false) } },
+        }),
+      )
+      .then((h) => {
+        handle = h
+        if (cancelled) handle?.dispose?.()
+      })
+      .catch((err) => {
+        if (cancelled) return
+        console.error(`Splat renderer "${library}" error:`, err)
         setError(true)
-      }
-    })()
+        setLoading(false)
+      })
 
     return () => {
-      active = false
-      if (viewerRef.current) {
-        const v = viewerRef.current
-        viewerRef.current = null
-        try { Promise.resolve(v.dispose()).catch(() => {}) } catch (_) {}
-      }
+      cancelled = true
+      try { handle?.dispose?.() } catch (_) {}
       try { viewerDiv.remove() } catch (_) {}
     }
-  }, [quality])
+  }, [library, quality])
 
   function toggleFullscreen() {
     const el = wrapperRef.current
@@ -101,21 +93,26 @@ export default function GaussianSplatViewer({ quality }) {
         ;(document.exitFullscreen || document.webkitExitFullscreen).call(document)
       }
     } else {
-      setIsCSSFullscreen(p => !p)
+      setIsCSSFullscreen((p) => !p)
     }
-  }
-
-  function toggleInfo() {
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'i', code: 'KeyI', bubbles: true }))
   }
 
   return (
     <div ref={wrapperRef} className={`splat-wrapper${isCSSFullscreen ? ' css-fullscreen' : ''}`}>
+      {loading && !error && (
+        <div className="splat-overlay splat-loading">
+          <span className="splat-spinner" aria-hidden="true" />
+          <span>Loading 3D scene…</span>
+        </div>
+      )}
       {error && <div className="splat-overlay">3D scene unavailable</div>}
       <div ref={containerRef} className="splat-container" />
       <div className="splat-viewer-btns">
-        <button className="splat-viewer-btn" onClick={toggleInfo} title="Toggle info">i</button>
-        <button className="splat-viewer-btn" onClick={toggleFullscreen} title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}>
+        <button
+          className="splat-viewer-btn"
+          onClick={toggleFullscreen}
+          title={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        >
           {fullscreen ? <CompressIcon /> : <ExpandIcon />}
         </button>
       </div>

@@ -28,16 +28,22 @@ export default function HomePage() {
         </div>
       </section>
       <div className="splat-bar">
-        <div className="splat-bar-controls">
-          <button
-            className={`splat-bar-btn${quality === 'high' ? ' active' : ''}`}
-            onClick={() => setQuality('high')}
-          >Quality</button>
-          <button
-            className={`splat-bar-btn${quality === 'fast' ? ' active' : ''}`}
-            onClick={() => setQuality('fast')}
-          >Fast</button>
+        <div className="splat-bar-group">
+          <span className="splat-bar-label">Quality</span>
+          <div className="splat-bar-controls">
+            <button
+              className={`splat-bar-btn${quality === 'high' ? ' active' : ''}`}
+              onClick={() => setQuality('high')}
+            >Quality</button>
+            <button
+              className={`splat-bar-btn${quality === 'fast' ? ' active' : ''}`}
+              onClick={() => setQuality('fast')}
+            >Fast</button>
+          </div>
         </div>
+        <span className="splat-controls-hint">
+          Drag to orbit · right-drag to pan · scroll to zoom · WASD + Q/E to move
+        </span>
         <p className="splat-caption">
           <strong>Santa Clara University Imaginarium Space</strong>
           {' '}— A space at the intersection of technology, arts, and humanities, dedicated to exploring extended reality, data visualization, digital art, and game design.

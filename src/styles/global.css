@@ -156,6 +156,25 @@ a:hover { color: var(--primary-dark); }
   background: rgba(26, 44, 62, 0.85);
 }
 
+.splat-loading {
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(26, 44, 62, 0.6);
+}
+
+.splat-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  animation: splat-spin 0.8s linear infinite;
+}
+
+@keyframes splat-spin {
+  to { transform: rotate(360deg); }
+}
+
 .hero-text {
   position: absolute;
   bottom: 0;
@@ -191,11 +210,34 @@ a:hover { color: var(--primary-dark); }
   flex-wrap: wrap;
 }
 
+.splat-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.splat-bar-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
 .splat-bar-controls {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
+
+.splat-bar-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.splat-bar-btn:disabled:hover { border-color: var(--border); color: var(--text-muted); }
 
 .splat-bar-btn {
   padding: 3px 12px;
@@ -235,6 +277,16 @@ a:hover { color: var(--primary-dark); }
   z-index: 1000;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* ── Controls hint ── */
+.splat-controls-hint {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  opacity: 0.7;
+  flex-shrink: 0;
 }
 
 /* ── Viewer button group (info + fullscreen) ── */
