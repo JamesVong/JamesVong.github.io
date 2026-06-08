@@ -42,7 +42,9 @@ export default function HomePage() {
           </div>
         </div>
         <span className="splat-controls-hint">
-          Drag to orbit · right-drag to pan · scroll to zoom · WASD + Q/E to move
+          {isMobile()
+            ? 'Drag to orbit · two fingers to pan & zoom'
+            : 'Drag to orbit · right-drag to pan · scroll to zoom · WASD + Q/E to move'}
         </span>
         <p className="splat-caption">
           <strong>Santa Clara University Imaginarium Space</strong>

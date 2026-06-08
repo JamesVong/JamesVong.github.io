@@ -16,7 +16,11 @@ export async function mount(container, { quality, onReady, onError }) {
 
   try {
     canvas = document.createElement('canvas')
-    canvas.style.cssText = 'width:100%;height:100%;display:block;'
+    // touch-action: none hands all gestures on the canvas to us instead of the
+    // browser (otherwise drags scroll/refresh the page and pinches zoom the tab).
+    canvas.style.cssText =
+      'width:100%;height:100%;display:block;touch-action:none;' +
+      '-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;'
     container.appendChild(canvas)
 
     const device = await pc.createGraphicsDevice(canvas, {
@@ -63,36 +67,88 @@ export async function mount(container, { quality, onReady, onError }) {
     }
     applyCam()
 
-    // mode: null (idle) | 'orbit' (left drag) | 'pan' (right/middle drag)
-    let mode = null
+    // Pointer interaction, tracked per pointerId so touch gestures resolve from
+    // how many fingers are down rather than mouse buttons:
+    //   mouse: left drag orbits, right/middle drag pans, wheel zooms
+    //   touch: one finger orbits, two fingers pinch-zoom + pan
+    // Capturing the pointer keeps the gesture even if a finger slides outside
+    // the canvas mid-drag (otherwise the browser reclaims it as a page scroll).
+    const pointers = new Map()
+    let mode = null // 'orbit' | 'pan' | 'gesture'
     let lastX = 0
     let lastY = 0
-    const onDown = (e) => {
-      mode = e.button === 0 ? 'orbit' : 'pan'
-      lastX = e.clientX
-      lastY = e.clientY
+    let gestureDist = 0
+    let gestureMidX = 0
+    let gestureMidY = 0
+
+    const panBy = (dx, dy) => {
+      // Pan the target along the camera's screen-space axes (entity right/up),
+      // scaled by distance so it feels consistent at any zoom.
+      const f = distance * 0.0015
+      const right = cam.right
+      const up = cam.up
+      target.x += right.x * -dx * f + up.x * dy * f
+      target.y += right.y * -dx * f + up.y * dy * f
+      target.z += right.z * -dx * f + up.z * dy * f
     }
-    const onUp = () => { mode = null }
-    const onMove = (e) => {
-      if (!mode) return
-      const dx = e.clientX - lastX
-      const dy = e.clientY - lastY
-      lastX = e.clientX
-      lastY = e.clientY
-      if (mode === 'orbit') {
-        // Up vector is -Y, which mirrors both screen axes, so both deltas are
-        // added (not subtracted) to make drag direction match a normal orbit.
-        yaw += dx * 0.3
-        pitch = Math.max(-89, Math.min(89, pitch - dy * 0.3))
+    const refreshGestureOrigin = () => {
+      const [a, b] = [...pointers.values()]
+      gestureDist = Math.hypot(a.x - b.x, a.y - b.y)
+      gestureMidX = (a.x + b.x) / 2
+      gestureMidY = (a.y + b.y) / 2
+    }
+    const refreshMode = () => {
+      const list = [...pointers.values()]
+      if (list.length >= 2) {
+        mode = 'gesture'
+        refreshGestureOrigin()
+      } else if (list.length === 1) {
+        const p = list[0]
+        mode = p.type === 'mouse' && p.button !== 0 ? 'pan' : 'orbit'
+        lastX = p.x
+        lastY = p.y
       } else {
-        // Pan the target along the camera's screen-space axes (entity right/up),
-        // scaled by distance so it feels consistent at any zoom.
-        const f = distance * 0.0015
-        const right = cam.right
-        const up = cam.up
-        target.x += right.x * -dx * f + up.x * dy * f
-        target.y += right.y * -dx * f + up.y * dy * f
-        target.z += right.z * -dx * f + up.z * dy * f
+        mode = null
+      }
+    }
+    const onDown = (e) => {
+      canvas.setPointerCapture(e.pointerId)
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType, button: e.button })
+      refreshMode()
+    }
+    const onUpOrCancel = (e) => {
+      pointers.delete(e.pointerId)
+      try { canvas.releasePointerCapture(e.pointerId) } catch (_) {}
+      refreshMode()
+    }
+    const onMove = (e) => {
+      const p = pointers.get(e.pointerId)
+      if (!p || !mode) return
+      p.x = e.clientX
+      p.y = e.clientY
+
+      if (mode === 'gesture') {
+        const prevDist = gestureDist
+        const prevMidX = gestureMidX
+        const prevMidY = gestureMidY
+        refreshGestureOrigin()
+        if (prevDist > 0 && gestureDist > 0) {
+          distance = Math.max(0.4, Math.min(20, distance * (prevDist / gestureDist)))
+        }
+        panBy(gestureMidX - prevMidX, gestureMidY - prevMidY)
+      } else {
+        const dx = p.x - lastX
+        const dy = p.y - lastY
+        lastX = p.x
+        lastY = p.y
+        if (mode === 'orbit') {
+          // Up vector is -Y, which mirrors both screen axes, so both deltas are
+          // added (not subtracted) to make drag direction match a normal orbit.
+          yaw += dx * 0.3
+          pitch = Math.max(-89, Math.min(89, pitch - dy * 0.3))
+        } else {
+          panBy(dx, dy)
+        }
       }
       applyCam()
     }
@@ -103,14 +159,16 @@ export async function mount(container, { quality, onReady, onError }) {
     }
     const onContextMenu = (e) => e.preventDefault()
     canvas.addEventListener('pointerdown', onDown)
-    window.addEventListener('pointerup', onUp)
-    window.addEventListener('pointermove', onMove)
+    canvas.addEventListener('pointerup', onUpOrCancel)
+    canvas.addEventListener('pointercancel', onUpOrCancel)
+    canvas.addEventListener('pointermove', onMove)
     canvas.addEventListener('wheel', onWheel, { passive: false })
     canvas.addEventListener('contextmenu', onContextMenu)
     detachers.push(() => {
       canvas.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointermove', onMove)
+      canvas.removeEventListener('pointerup', onUpOrCancel)
+      canvas.removeEventListener('pointercancel', onUpOrCancel)
+      canvas.removeEventListener('pointermove', onMove)
       canvas.removeEventListener('wheel', onWheel)
       canvas.removeEventListener('contextmenu', onContextMenu)
     })
