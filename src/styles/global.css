@@ -38,7 +38,6 @@ body {
 /* Small utility elements stay sans-serif */
 .tag, .pub-venue,
 .project-category, .project-date,
-.experience-meta, .education-date,
 .theme-toggle, .theme-panel {
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -282,16 +281,6 @@ a:hover { color: var(--primary-dark); }
   height: 100% !important;
 }
 
-/* ── Controls hint ── */
-.splat-controls-hint {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 0.64rem;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
 /* ── Viewer button group (info + fullscreen) ── */
 .splat-viewer-btns {
   position: absolute;
@@ -369,9 +358,14 @@ a:hover { color: var(--primary-dark); }
   line-height: 1.65;
 }
 
-.pub-link {
-  display: inline-block;
+.pub-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
   margin-top: 14px;
+}
+
+.pub-link {
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -499,12 +493,17 @@ a:hover { color: var(--primary-dark); }
   gap: 5px;
 }
 
+.project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 4px;
+}
+
 .project-link {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--primary);
-  margin-top: 4px;
-  align-self: flex-start;
 }
 
 /* ===== TAGS ===== */

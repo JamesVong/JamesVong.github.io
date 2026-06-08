@@ -41,11 +41,6 @@ export default function HomePage() {
             >Fast</button>
           </div>
         </div>
-        <span className="splat-controls-hint">
-          {isMobile()
-            ? 'Drag to orbit · two fingers to pan & zoom'
-            : 'Drag to orbit · right-drag to pan · scroll to zoom · WASD + Q/E to move'}
-        </span>
         <p className="splat-caption">
           <strong>Santa Clara University Imaginarium Space</strong>
           {' '}— A space at the intersection of technology, arts, and humanities, dedicated to exploring extended reality, data visualization, digital art, and game design.
@@ -57,7 +52,7 @@ export default function HomePage() {
         <div className="container">
           <h2 className="section-title">About</h2>
           <p className="about-text">
-            MS Computer Science candidate at Santa Clara University (GPA 3.7), focusing on AI,
+            MS Computer Science graduate of Santa Clara University (GPA 3.7), focusing on AI,
             computer vision, and neural rendering. Research team leader at the SCU Imaginarium AI
             Research Lab under Dr. D. Jeong, with work co-authored and accepted to ICCV 2025.
             Experienced across the stack — from embedded C and CUDA kernels to production web apps —
@@ -76,10 +71,14 @@ export default function HomePage() {
               <span className="pub-venue">{pub.venue}</span>
               <p className="pub-authors">{pub.authors}</p>
               <p className="pub-description">{pub.description}</p>
-              {pub.link && (
-                <a href={pub.link} target="_blank" rel="noopener noreferrer" className="pub-link">
-                  Read Paper →
-                </a>
+              {pub.links && pub.links.length > 0 && (
+                <div className="pub-links">
+                  {pub.links.map(({ url, label }) => (
+                    <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="pub-link">
+                      {label} →
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
           ))}
@@ -130,7 +129,7 @@ export default function HomePage() {
             <div key={i} className="education-item">
               <div className="education-header">
                 <h3>{edu.degree}</h3>
-                <span className="education-date">{edu.graduation}</span>
+                <span className="education-date">{edu.dates}</span>
               </div>
               <p className="education-school">{edu.school} · {edu.location}</p>
               <p className="education-gpa">GPA: {edu.gpa}</p>

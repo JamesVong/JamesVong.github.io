@@ -1,5 +1,5 @@
 export default function ProjectCard({ project }) {
-  const { title, date, category, description, tags, link, featured } = project
+  const { title, date, category, description, tags, links, featured } = project
 
   return (
     <div className={`project-card${featured ? ' featured' : ''}`}>
@@ -12,10 +12,14 @@ export default function ProjectCard({ project }) {
       <div className="project-tags">
         {tags.map(tag => <span key={tag} className="tag">{tag}</span>)}
       </div>
-      {link && (
-        <a href={link} target="_blank" rel="noopener noreferrer" className="project-link">
-          View Project →
-        </a>
+      {links && links.length > 0 && (
+        <div className="project-links">
+          {links.map(({ url, label }) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="project-link">
+              {label} →
+            </a>
+          ))}
+        </div>
       )}
     </div>
   )
