@@ -36,7 +36,7 @@ export const publications = [
 export const experience = [
   {
     org: 'SCU Imaginarium AI Research Lab',
-    advisor: 'Advisor: Dr. D. Jeong',
+    advisor: 'Advisor: Dr. David Jeong',
     location: 'Santa Clara, CA',
     dates: 'Jul. 2024 – Present',
     role: 'Research Team Leader',
@@ -48,7 +48,7 @@ export const experience = [
   },
   {
     org: 'SCU Internet of Things Research Lab',
-    advisor: 'Advisor: Dr. B. Dezfouli',
+    advisor: 'Advisor: Dr. Behnam Dezfouli',
     location: 'Santa Clara, CA',
     dates: 'Jun. 2023 – Jan. 2025',
     role: 'Research Assistant',
@@ -63,6 +63,7 @@ export const experience = [
 export const projects = [
   {
     title: 'Chess Atlas',
+    image: '/projects/chessatlasexplorer.png',
     date: 'Jan. 2025 – Present',
     category: 'AI / ML',
     description:
@@ -105,6 +106,7 @@ export const projects = [
   },
   {
     title: 'Study Rush',
+    image: '/projects/studyrush.png',
     date: 'Jun. 2024',
     category: 'Hackathon',
     description:
@@ -116,10 +118,11 @@ export const projects = [
   },
   {
     title: 'Sunken Cost',
+    image: '/projects/sunkencost.jpg',
     date: 'Apr. 2024',
     category: 'Hackathon · Game',
     description:
-      'Roblox Hack — Led a team entirely new to Roblox development through game ideation and Lua development. Earned $600 first-place prize and a newspaper editorial from The Santa Clara.',
+      'Roblox Hack: Led a team entirely new to Roblox development through game ideation and Lua development. Earned $600 first-place prize and a newspaper editorial from The Santa Clara.',
     tags: ['Lua', 'Roblox Studio', 'Game Dev'],
     links: [
       { url: 'https://devpost.com/software/sunken-cost', label: 'Devpost' },
@@ -130,6 +133,7 @@ export const projects = [
   },
   {
     title: 'ProgressPlanted',
+    image: '/projects/ProgressPlanted.jpg',
     date: 'Feb. 2023',
     category: 'Hackathon',
     description:
@@ -141,6 +145,7 @@ export const projects = [
   },
   {
     title: 'Chillspaces',
+    image: '/projects/chillspaces.jpg',
     date: 'Nov. 2022',
     category: 'Hackathon',
     description:
@@ -153,7 +158,8 @@ export const projects = [
     featured: true,
   },
   {
-    title: 'Seek — Career Navigator',
+    title: 'Seek - Career Navigator',
+    image: '/projects/seekcareernav.jpg',
     date: 'Feb. 2021',
     category: 'Hackathon',
     description:
@@ -167,8 +173,8 @@ export const projects = [
 ]
 
 export const skills = {
-  languages: ['Python', 'C/C++', 'C', 'SQL', 'JavaScript (Node.js)', 'TypeScript'],
+  languages: ['Python', 'C/C++', 'SQL', 'JavaScript (Node.js)', 'TypeScript'],
   frameworks: ['React', 'Flask', 'Pandas', 'OpenCV', 'NumPy', 'TensorFlow', 'PyTorch'],
   tools: ['Git & GitHub', 'Docker', 'Google Cloud Platform', 'Linux'],
-  databases: ['PostgreSQL', 'DuckDB', 'MongoDB'],
+  databases: ['PostgreSQL', 'SQLite', 'DuckDB', 'InfluxDB', 'MongoDB'],
 }

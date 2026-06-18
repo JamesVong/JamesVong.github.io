@@ -42,8 +42,7 @@ export default function HomePage() {
           </div>
         </div>
         <p className="splat-caption">
-          <strong>Santa Clara University Imaginarium Space</strong>
-          {' '}— A space at the intersection of technology, arts, and humanities, dedicated to exploring extended reality, data visualization, digital art, and game design.
+          <strong>Santa Clara University Imaginarium: </strong> A space at the intersection of technology, arts, and humanities, dedicated to exploring extended reality, data visualization, digital art, and game design.
         </p>
       </div>
 
@@ -51,13 +50,22 @@ export default function HomePage() {
       <section className="section" id="about">
         <div className="container">
           <h2 className="section-title">About</h2>
-          <p className="about-text">
-            MS Computer Science graduate of Santa Clara University (GPA 3.7), focusing on AI,
-            computer vision, and neural rendering. Research team leader at the SCU Imaginarium AI
-            Research Lab under Dr. D. Jeong, with work co-authored and accepted to ICCV 2025.
-            Experienced across the stack — from embedded C and CUDA kernels to production web apps —
-            and a persistent competitor in hackathons with multiple awards.
-          </p>
+          <div className="about-grid">
+            <p className="about-text">
+              MS Computer Science graduate of Santa Clara University (GPA 3.7), focusing on AI,
+              computer vision, and neural rendering. Research team leader at the SCU Imaginarium AI
+              Research Lab under Dr. David Jeong, with work co-authored and accepted to ICCV 2025.
+              Experienced across the stack from embedded C to production web apps,
+              and a persistent competitor in hackathons with multiple awards.
+            </p>
+            <figure className="about-photo">
+              <img
+                src="/headshot.jpg"
+                alt="James Vong"
+                onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+              />
+            </figure>
+          </div>
         </div>
       </section>
 
@@ -71,6 +79,16 @@ export default function HomePage() {
               <span className="pub-venue">{pub.venue}</span>
               <p className="pub-authors">{pub.authors}</p>
               <p className="pub-description">{pub.description}</p>
+              {pub.image && (
+                <figure className="pub-figure">
+                  <img
+                    src={pub.image}
+                    alt={`${pub.title} — teaser figure`}
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.parentElement.style.display = 'none' }}
+                  />
+                </figure>
+              )}
               {pub.links && pub.links.length > 0 && (
                 <div className="pub-links">
                   {pub.links.map(({ url, label }) => (
@@ -112,7 +130,7 @@ export default function HomePage() {
       {/* ── PROJECTS ── */}
       <section className="section section-alt" id="projects">
         <div className="container">
-          <h2 className="section-title">Projects &amp; Moments</h2>
+          <h2 className="section-title">Projects</h2>
           <div className="projects-grid">
             {projects.map((project, i) => (
               <ProjectCard key={i} project={project} />
